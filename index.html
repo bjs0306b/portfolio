@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#2a2d34;}
+  *{ -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+
+  /* ── 토큰 ───────────────────────────────────────────────────
+     v30 원칙: 한 장 = 한 주장. 문단을 쓰지 않는다.
+     카드 하나는 "지표 한 줄 + 제목 한 줄 + 설명 두 줄"을 넘지 않는다. */
+  :root{
+    --bg:#f5f6f8; --surface:#ffffff; --bg-dark:#12151b;
+    --ink:#171a21; --ink-2:#49515f; --ink-3:#7c8493; --line:#e1e4ea;
+    --accent:#2f4bd8; --neg:#b4453a; --pos:#1c7a46;
+    --ink-d:#eef1f6; --ink-d2:#99a2b3; --line-d:rgba(255,255,255,0.12);
+    --accent-d:#5ee08a;
+    --r:12px; --r-pill:999px;
+    --mono:'IBM Plex Mono',monospace; --sans:'Pretendard',sans-serif;
+  }
+
+  .s{width:100%;height:100%;box-sizing:border-box;background:var(--bg);color:var(--ink);
+     font-family:var(--sans);padding:58px 80px 52px;display:flex;flex-direction:column;
+     position:relative;overflow:hidden;}
+
+  /* ── 본문 장 머리 ── */
+  .top{display:flex;align-items:baseline;gap:18px;}
+  .top .no{font-family:var(--mono);font-size:16px;letter-spacing:0.14em;color:var(--accent);
+           font-weight:600;}
+  .top .pg{margin-left:auto;font-family:var(--mono);font-size:16px;color:var(--ink-3);
+           letter-spacing:0.06em;}
+  .claim{margin:24px 0 0;font-size:52px;font-weight:800;letter-spacing:-0.034em;line-height:1.12;
+         word-break:keep-all;}
+  .claim em{font-style:normal;color:var(--accent);}
+  .lead{margin:16px 0 0;font-size:22px;line-height:1.5;color:var(--ink-2);max-width:1520px;
+        word-break:keep-all;}
+
+  /* ── 카드 — 한 장에 3~4개. 이보다 늘리지 않는다 ── */
+  /* 카드는 글 높이만큼만 쓴다(억지로 늘리면 카드 안이 텅 빈다).
+     남는 높이는 위아래로 나눠 카드 줄이 화면 가운데에 앉는다. */
+  .cards{display:grid;gap:22px;margin:auto 0;}
+  .cards.n2{grid-template-columns:repeat(2,1fr);}
+  .cards.n3{grid-template-columns:repeat(3,1fr);}
+  .cards.n4{grid-template-columns:repeat(4,1fr);}
+  .cards.n5{grid-template-columns:repeat(5,1fr);}   /* 5칸은 글자를 한 단계 줄인다 — 원인 5개를 한 줄로 둘 때만 */
+  .cards.n5 .card{padding:24px 22px 26px;}
+  .cards.n5 .card .kv{font-size:36px;}
+  .cards.n5 .card h3{font-size:22px;}
+  .cards.n5 .card p{font-size:17.5px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--accent);
+        border-radius:var(--r);padding:28px 28px 30px;}
+  .card .kv{font-family:var(--mono);font-size:42px;font-weight:600;line-height:1;
+            letter-spacing:-0.03em;color:var(--accent);}
+  .card .kv small{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--ink-3);
+                  margin-left:7px;letter-spacing:0;}
+  .card h3{margin:15px 0 0;font-size:25px;font-weight:800;letter-spacing:-0.015em;line-height:1.3;
+           word-break:keep-all;}
+  .card p{margin:11px 0 0;font-size:19px;line-height:1.6;color:var(--ink-2);word-break:keep-all;}
+  .card.warn{border-top-color:var(--neg);}
+  .card.warn .kv{color:var(--neg);}
+
+  /* ── 단계 서사 — 카드로는 순서가 안 보이는 내용(A→B→C)만 여기 쓴다 ── */
+  .flow{display:flex;align-items:stretch;gap:0;margin-top:26px;}
+  /* 흐름 줄이 여러 개면 그 묶음이 남는 높이를 나눠 갖는다 */
+  .flow:first-of-type{margin-top:auto;}
+  .flow:last-of-type{margin-bottom:auto;}
+  .flow .st{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+            padding:18px 22px;}
+  .flow .st > b{display:block;font-size:21px;font-weight:800;letter-spacing:-0.01em;
+              word-break:keep-all;}
+  .flow .st span{display:block;margin-top:7px;font-size:18px;line-height:1.5;color:var(--ink-2);
+                 word-break:keep-all;}
+  .flow .st.last{border-color:var(--accent);background:rgba(47,75,216,0.06);}
+  .flow .ar{display:flex;align-items:center;padding:0 16px;font-family:var(--mono);font-size:26px;
+            color:var(--ink-3);}
+  .flow .fl{font-size:18px;font-weight:700;color:var(--accent);align-self:center;
+            padding-right:22px;white-space:nowrap;}
+  /* 본문 안의 강조는 한 덩어리로 — 줄 중간에서 끊기거나(계단) 제 줄을 차지하지(블록) 않는다.
+     한 줄에 못 들어가는 강조는 CSS가 아니라 볼드 범위를 줄여서 푼다. */
+  .lead b, .card p b, .flow .st span b, .vflow .st span b, .cap b, .kpi .k b{
+    display:inline;font-size:inherit;font-weight:800;white-space:nowrap;}
+
+  /* 한 장에 성격이 다른 묶음이 둘 이상 오면 머리를 달아 경계를 만든다 */
+  .bh2{display:flex;align-items:baseline;gap:16px;margin-bottom:16px;}
+  .bh2 b{font-size:26px;font-weight:800;letter-spacing:-0.02em;color:var(--accent);white-space:nowrap;}
+  .bh2 span{font-size:19px;color:var(--ink-2);word-break:keep-all;}
+  .bh2::after{content:'';flex:1;height:1px;background:var(--line);}
+
+  /* 두 묶음을 좌우로 놓고 가운데 세로 구분선. 각 묶음 안은 세로 배열 */
+  .two{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;margin-top:26px;}
+  .two > .col{padding:0 40px;border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;}
+  .two > .col:first-child{padding-left:0;border-left:none;}
+  .two > .col:last-child{padding-right:0;}
+  .stack{display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;}
+  .stack > .card{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 24px;}
+  .stack > .card .kv{font-size:34px;}
+  .stack > .card h3{margin-top:10px;font-size:22px;}
+  .stack > .card p{margin-top:8px;font-size:18px;}
+  .vflow{display:flex;flex-direction:column;flex:1;min-height:0;}
+  .vflow .st{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+             padding:18px 24px;display:flex;flex-direction:column;justify-content:center;}
+  .vflow .st > b{display:block;font-size:22px;font-weight:800;letter-spacing:-0.01em;word-break:keep-all;}
+  .vflow .st span{display:block;margin-top:8px;font-size:18px;line-height:1.5;color:var(--ink-2);
+                  word-break:keep-all;}
+  .vflow .st.last{border-color:var(--accent);background:rgba(47,75,216,0.06);}
+  .vflow .ar{display:flex;align-items:center;justify-content:center;padding:6px 0;
+             font-family:var(--mono);font-size:24px;color:var(--ink-3);}
+
+  /* 흐름 하나짜리 장: 흐름이 남는 높이의 가운데에 앉는다 */
+  .s.one .flow{margin:auto 0;}
+  .s.one .bh2{margin-top:28px;}   /* 세로 흐름 장: 머리가 lead에 붙지 않게 */
+  /* 단계 상자 안에 아키텍처 그림(인라인 SVG, 토큰 색만 사용)을 넣는 장 */
+  .s.one .flow.dia .st{min-height:0;padding:30px 26px 26px;justify-content:flex-start;}
+  .s.one .flow.dia .st .dg{display:block;width:100%;height:auto;margin-top:16px;}
+  .s.one .flow.dia .st span{min-height:68px;}
+  /* 내용은 그대로, 상자·글자만 키워 한 줄이 장의 가운데 띠를 이루게 한다 */
+  .s.one .flow .st{min-height:330px;padding:40px 40px;display:flex;flex-direction:column;justify-content:center;}
+  .s.one .flow .st > b{font-size:27px;}
+  .s.one .flow .st span{font-size:21px;line-height:1.6;margin-top:14px;}
+  .s.one .flow .ar{font-size:34px;padding:0 22px;}
+  .s.one .flow .fl{font-size:22px;padding-right:30px;}
+
+  /* 비전 장: 모델 카드와 학습 사이클이 각각 제 머리에 붙어 움직인다 */
+  .s.vis .cards{margin:auto 0 0;}
+  .s.vis .cards .kv{font-size:30px;}   /* 모델명은 참조값 — 학습 사이클보다 앞서지 않게 */
+  .s.vis .bh2{margin-top:34px;}
+  .s.vis .flow{margin-top:0;margin-bottom:auto;}
+
+  /* 운영 장: 머리+본문이 한 덩어리로 움직이고, 남는 높이는 위아래로 나뉜다 */
+  .s.ops .lead + .bh2{margin-top:auto;}   /* :first-of-type은 클래스가 아니라 태그 기준이라 안 걸린다 */
+  .s.ops .bh2 ~ .bh2{margin-top:38px;}
+  .s.ops .cards{margin:0;}
+  .s.ops .flow{margin:0 0 auto;}
+
+  /* ── 수치 띠 ── */
+  .kpi.n5{grid-template-columns:repeat(5,1fr);}
+  .kpi.n3{grid-template-columns:repeat(3,1fr);}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);
+       margin-top:auto;padding-top:18px;}
+  .kpi > div{padding:0 20px;border-left:1px solid var(--line);}
+  .kpi > div:first-child{padding-left:0;border-left:none;}
+  .kpi .v{font-family:var(--mono);font-size:33px;font-weight:600;letter-spacing:-0.02em;}
+  .kpi .k{margin-top:5px;font-size:16px;color:var(--ink-3);word-break:keep-all;}
+
+  /* ── 마무리 한 줄 ── */
+  .close{margin-top:24px;border-left:4px solid var(--accent);background:rgba(47,75,216,0.05);
+         border-radius:0 var(--r) var(--r) 0;padding:16px 24px;font-size:21px;line-height:1.5;
+         color:var(--ink);word-break:keep-all;}
+  .close b{font-weight:800;}
+
+  .num{font-family:var(--mono);font-weight:600;color:var(--ink);}
+  .neg{color:var(--neg);font-weight:600;}
+  .pos{color:var(--pos);font-weight:600;}
+  code{font-family:var(--mono);font-size:0.94em;color:var(--accent);}
+
+  /* ── 프로젝트 인트로 ── */
+  .intro .ihd{display:flex;align-items:baseline;gap:24px;padding-bottom:16px;
+              border-bottom:3px solid var(--ink);}
+  .intro .ino{font-family:var(--mono);font-size:16px;letter-spacing:0.22em;color:var(--accent);
+              font-weight:600;white-space:nowrap;}
+  .intro h1{margin:0;font-size:56px;font-weight:800;letter-spacing:-0.04em;line-height:1;
+            white-space:nowrap;}
+  .intro .idef{font-size:21px;line-height:1.45;color:var(--ink-2);word-break:keep-all;}
+  .intro .mid{display:grid;grid-template-columns:480px 1fr;gap:44px;flex:1;min-height:0;
+              margin-top:24px;}
+
+  /* 인트로 아키텍처 — 인라인 SVG 한 장. 담당은 색(강조 테두리) + 범례 "내 담당"으로만 표시 */
+  .arch{display:flex;flex-direction:column;min-height:0;}
+  .arch.dgm{justify-content:flex-start;}
+  .arch.dgm .dg{display:block;width:100%;height:auto;max-height:100%;}
+
+  /* 사진 */
+  .shots{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:18px;
+         min-height:0;}
+  /* 사진 넉 장이 한 덩어리로 보이면 "전부 같은 장면인가"로 읽힌다.
+     행마다 무엇을 보는 사진인지 머리를 달아 위/아래를 가른다. */
+  .shots.rows{display:flex;flex-direction:column;gap:20px;}
+  .srow{flex:1;display:flex;flex-direction:column;min-height:0;}
+  .srow .rl{display:flex;align-items:baseline;gap:12px;padding-bottom:7px;margin-bottom:11px;
+            border-bottom:2px solid var(--accent);}
+  .srow .rl .n{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--accent);}
+  .srow .rl b{font-size:20px;font-weight:800;letter-spacing:-0.01em;color:var(--ink);
+              white-space:nowrap;}
+  .srow .rl span{font-size:17px;color:var(--ink-2);word-break:keep-all;}
+  .srow .rg{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .shot{border-radius:var(--r);overflow:hidden;border:1px solid rgba(23,26,33,0.16);
+        position:relative;background:#0d1014;min-height:0;}
+  .shot.cut{background:var(--surface);border-color:var(--line);}
+  .shot img{width:100%;height:100%;object-fit:contain;display:block;}
+  .shot .cap{position:absolute;left:0;right:0;bottom:0;padding:9px 14px;font-size:16px;
+             line-height:1.35;color:#eef1f6;word-break:keep-all;
+             /* PDF 출력 시 그라데이션이 shading으로 변환돼 뷰어에 따라 깨진다. 단색 띠로 간다 */
+             background:rgba(0,0,0,0.72);}
+  .shot .cap b{color:#5ee08a;font-weight:700;}
+  .shot .cap b.no{color:#ff7a6b;}
+  .shot.cut .cap{background:none;color:var(--ink-2);}
+  .shot.cut .cap b{color:var(--accent);}
+
+  /* 사진을 못 쓰는 프로젝트 — 숫자만 크게 */
+  /* 숫자만 있는 우측 패널은 2열 격자로 두면 칸 안이 빈다. 가로 줄로 눕힌다 */
+  .figs{display:flex;flex-direction:column;gap:16px;min-height:0;}
+  .figs .fig{flex:1;flex-direction:row;align-items:center;justify-content:flex-start;gap:28px;padding:20px 32px;}
+  .figs .fig .n{min-width:250px;}
+  .figs .fig .k{margin-top:0;font-size:19px;}
+  .fig{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+       padding:22px 24px;display:flex;flex-direction:column;justify-content:center;}
+  .fig .n{font-family:var(--mono);font-size:46px;font-weight:600;line-height:1;
+          letter-spacing:-0.03em;color:var(--accent);}
+  .fig .n small{font-family:var(--sans);font-size:19px;font-weight:600;color:var(--ink-3);
+                margin-left:8px;}
+  .fig .k{margin-top:11px;font-size:18px;line-height:1.45;color:var(--ink-2);word-break:keep-all;}
+
+  .intro .meta{margin-top:22px;display:grid;grid-template-columns:repeat(4,1fr);
+               border-top:3px solid var(--ink);padding-top:16px;}
+  .intro .meta > div{padding:0 26px;border-left:1px solid var(--line);}
+  .intro .meta > div:first-child{padding-left:0;border-left:none;}
+  .intro .meta .mk{font-family:var(--mono);font-size:13px;letter-spacing:0.16em;
+                   text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  .intro .meta .mv{font-size:18px;line-height:1.4;color:var(--ink);word-break:keep-all;}
+  .intro .meta .mv code{color:var(--accent);}
+
+  /* ── 표지(그대로 유지) ── */
+  .s.cover{background:var(--bg-dark);color:var(--ink-d);padding:52px 80px 44px;}
+  .cover .eyebrow{font-family:var(--mono);font-size:16px;letter-spacing:0.22em;
+                  text-transform:uppercase;color:var(--accent-d);font-weight:500;}
+  .cover .who{font-family:var(--mono);font-size:18px;color:var(--ink-d2);margin-top:18px;
+              letter-spacing:0.04em;}
+  .cv-h1{margin:16px 0 0;font-size:72px;font-weight:800;line-height:1.12;letter-spacing:-0.035em;white-space:nowrap;}
+  .cv-h1 .g{color:var(--accent-d);}
+  .cv-h1 .m{color:var(--ink-d2);}
+  .cv-sum{margin:18px 0 0;font-size:22px;line-height:1.5;color:var(--ink-d2);word-break:keep-all;white-space:nowrap;}
+  .cv-cols{display:grid;grid-template-columns:440px 1fr 1fr 1.25fr;gap:44px;
+           margin-top:auto;margin-bottom:56px;align-items:start;}
+  .cv-lb{font-family:var(--mono);font-size:20px;letter-spacing:0.2em;text-transform:uppercase;
+         color:var(--accent-d);font-weight:600;margin-bottom:18px;}
+  .cv-contact{display:grid;grid-template-columns:auto 1fr;row-gap:19px;column-gap:20px;
+              align-items:baseline;font-family:var(--mono);}
+  .cv-contact .k{font-size:18px;letter-spacing:0.1em;color:var(--ink-d2);white-space:nowrap;}
+  .cv-contact .v{font-size:22px;color:var(--ink-d);white-space:nowrap;}
+  .cv-list{display:grid;row-gap:19px;}
+  .cv-list div{font-size:23px;color:var(--ink-d);word-break:keep-all;}
+  /* 날짜를 열 오른쪽 끝이나 공통 x축에 맞추지 않는다.
+     항목명 길이에 관계없이 이름과 날짜 사이 간격만 늘 같게 둔다. */
+  .cv-cert{display:grid;row-gap:19px;}
+  .cv-cert > div{display:flex;align-items:baseline;gap:14px;}
+  .cv-cert .cn{font-size:23px;color:var(--ink-d);word-break:keep-all;}
+  .cv-cert .cd{font-family:var(--mono);font-size:17px;color:var(--ink-d2);letter-spacing:0.03em;
+               white-space:nowrap;}
+  .cv-idx{padding-top:22px;}
+  .cv-idx-hd{display:flex;justify-content:space-between;align-items:baseline;
+             padding-bottom:10px;border-bottom:1px solid var(--line-d);}
+  .cv-row{display:grid;grid-template-columns:56px 230px 1fr auto;align-items:baseline;
+          gap:24px;padding:22px 0;border-bottom:1px solid var(--line-d);}
+  .cv-row .no{font-family:var(--mono);font-size:19px;color:var(--accent-d);}
+  .cv-row .nm{font-size:25px;font-weight:700;color:var(--ink-d);}
+  .cv-row .ds{font-size:21px;color:var(--ink-d2);word-break:keep-all;}
+  .cv-row .st{font-family:var(--mono);font-size:17px;color:var(--ink-d2);text-align:right;
+              white-space:nowrap;}
+
+  /* 6p 트러블슈팅 매트릭스 (3건 × 증상·원인·해결) */
+  .tmx{margin:34px 0 0;flex:1;min-height:0;}
+  .ts3 code,.tmx code,.trows code{font-family:var(--mono);font-size:0.9em;color:var(--accent);}
+  .tmx{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;overflow:hidden;height:100%;}
+  .tmx .trow{display:grid;grid-template-columns:150px repeat(3,1fr);border-top:1px solid var(--line);flex:1;min-height:0;}
+  .tmx .trow:first-child{border-top:none;flex:0 0 auto;}
+  .tmx .rl{font-size:20px;font-weight:800;color:var(--ink);padding:24px 26px;background:var(--surface);border-right:1px solid var(--line);display:flex;align-items:center;letter-spacing:-0.01em;}
+  .tmx .rc{padding:24px 30px;border-right:1px solid var(--line);font-size:22px;line-height:1.55;color:var(--ink-2);word-break:keep-all;display:flex;flex-wrap:wrap;align-content:center;align-items:baseline;}
+  .tmx .rc:last-child{border-right:none;}
+  .tmx .trh{background:var(--surface);}
+  .tmx .trh .rc{padding-top:26px;padding-bottom:26px;}
+  .tmx .trh .rc b{font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-0.015em;}
+  .tmx .tcz{background:rgba(47,75,216,0.05);}
+  .tmx .rc code, .tmx .rc b{margin-right:0.35em;}
+  .tmx .tcz .rc b{color:var(--ink);font-weight:800;flex-basis:100%;margin:0 0 6px;}
+  .tmx .tfz .rc{color:var(--ink-2);}
+
+  /* 11p 우측 — AI와 일한 방식 (12p 하네스 게이트와 겹치지 않는 것만) */
+  .hns2{display:flex;flex-direction:column;gap:18px;min-height:0;padding:2px 0 26px;}
+  .hns2 .hnh{padding-bottom:14px;border-bottom:2px solid var(--accent);}
+  .hns2 .hnh b{font-size:26px;font-weight:800;letter-spacing:-0.02em;color:var(--ink);}
+  .hns2 .hgrp{display:flex;flex-direction:column;justify-content:center;gap:12px;flex:1;min-height:0;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:22px 26px;}
+  .hns2 .glab{font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-0.015em;}
+  .hns2 .glab em{font-style:normal;font-size:15px;font-weight:600;color:var(--ink-3);margin-left:10px;}
+  .hns2 .chips{display:flex;flex-wrap:wrap;gap:9px;}
+  .hns2 .chips span{font-size:16px;font-weight:600;color:var(--accent);background:rgba(47,75,216,0.08);border:1px solid rgba(47,75,216,0.35);border-radius:var(--r-pill);padding:7px 15px;}
+  .hns2 .grow{font-size:17.5px;line-height:1.5;color:var(--ink-2);word-break:keep-all;}
+  .hns2 .grow b{color:var(--ink);font-weight:800;margin-right:8px;}
+  .hns2 code{font-family:var(--mono);font-size:0.9em;color:var(--accent);}
+  /* 11p 좌측 아키텍처를 넓혀 세로를 채운다 */
+  .s.intro[data-label="HairFolio 인트로"] .mid{grid-template-columns:560px 1fr;}
+
+  /* 13p — 결함 ①과 인가 조치를 붙여 보이게 */
+  .dfx{display:grid;grid-template-columns:1.08fr 1fr;gap:40px;flex:1;min-height:0;margin-top:26px;}
+  .dfx .dleft,.dfx .dright{display:flex;flex-direction:column;min-height:0;}
+  .dfx .dhead{display:flex;align-items:center;gap:12px;padding-bottom:11px;margin-bottom:14px;border-bottom:2px solid var(--accent);}
+  .dfx .dright .dhead{border-bottom-color:var(--line);}
+  .dfx .dhead b{font-size:20px;font-weight:800;letter-spacing:-0.015em;color:var(--ink);}
+  .dfx .dtag{font-size:14px;font-weight:700;color:var(--neg);background:rgba(180,69,58,0.1);border:1px solid rgba(180,69,58,0.35);border-radius:var(--r-pill);padding:4px 12px;}
+  .dfx .dtag.alt{color:var(--ink-3);background:var(--bg);border-color:var(--line);}
+  .dfx .dbig{flex:0 0 auto;}
+  .dfx .darr{text-align:center;font-size:16px;font-weight:700;color:var(--accent);padding:12px 0 10px;}
+  .dfx .dsteps{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;min-height:0;}
+  .dfx .dst{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:15px 18px;display:flex;flex-direction:column;justify-content:center;}
+  .dfx .dst.last{border-color:var(--accent);background:rgba(47,75,216,0.06);}
+  .dfx .dst b{display:block;font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-0.01em;}
+  .dfx .dst span{display:block;margin-top:6px;font-size:16px;line-height:1.45;color:var(--ink-2);word-break:keep-all;}
+  .dfx .dright .card{flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .dfx .dright .card + .card{margin-top:18px;}
+  /* B: 문제 → 조치를 한 줄로 */
+  .dchain{display:grid;grid-template-columns:1fr 46px 2.05fr;align-items:stretch;gap:0;margin-top:26px;flex:1;min-height:0;}
+  .dchain .dlead{display:flex;flex-direction:column;justify-content:center;}
+  .dchain .dgo{display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--ink-3);}
+  .dchain .dfix{display:flex;flex-direction:column;min-height:0;}
+  .dchain .dfl{font-size:17px;font-weight:800;color:var(--accent);margin-bottom:10px;letter-spacing:-0.01em;}
+  .dchain .dsteps4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex:1;min-height:0;}
+  .dchain .dst{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 16px;display:flex;flex-direction:column;justify-content:center;}
+  .dchain .dst.last{border-color:var(--accent);background:rgba(47,75,216,0.06);}
+  .dchain .dst b{display:block;font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.01em;}
+  .dchain .dst span{display:block;margin-top:6px;font-size:15px;line-height:1.45;color:var(--ink-2);word-break:keep-all;}
+  .drest{margin-top:24px;flex:1;min-height:0;}
+  .drest .card{display:flex;flex-direction:column;justify-content:center;}
+
+  /* N+1 카드 — 사례 번호 공통 */
+  .nn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+      background:var(--accent);color:#fff;font-family:var(--mono);font-size:15px;font-weight:700;flex:0 0 auto;font-style:normal;}
+  .nA code,.nB code,.nC code{font-family:var(--mono);font-size:0.88em;color:var(--accent);}
+  /* N1 — 번호 + 원인 → 처방 한 줄 */
+  .nA{display:flex;flex-direction:column;gap:16px;margin-top:20px;flex:1;min-height:0;}
+  .nA .nAr{display:grid;grid-template-columns:26px 1.05fr 30px 1fr;align-items:center;gap:16px;
+           background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:15px 20px;flex:1;min-height:0;}
+  .nA .nAc b{display:block;font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-0.01em;}
+  .nA .nAc span{display:block;margin-top:5px;font-size:16px;line-height:1.45;color:var(--ink-3);word-break:keep-all;}
+  .nA .nAg{text-align:center;font-size:20px;color:var(--ink-3);}
+  .nA .nAf{font-size:17px;line-height:1.45;color:var(--ink-2);word-break:keep-all;font-weight:600;}
+  /* N2 — 미니 카드 2장 */
+  .nB{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+  .nB .nBc{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
+  .nB .nBh{display:flex;align-items:center;gap:10px;padding-bottom:11px;margin-bottom:11px;border-bottom:1px solid var(--line);}
+  .nB .nBh b{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.01em;}
+  .nB .nBl{font-family:var(--mono);font-size:12px;letter-spacing:0.1em;color:var(--ink-3);margin-top:9px;}
+  .nB .nBl:first-of-type{margin-top:0;}
+  .nB .nBv{margin-top:3px;font-size:15.5px;line-height:1.45;color:var(--ink-2);word-break:keep-all;}
+  /* N3 — 미니 표 */
+  .nC{margin-top:16px;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .nC .nCh,.nC .nCr{display:grid;grid-template-columns:1fr 1.15fr 1.15fr;gap:16px;padding:11px 18px;align-items:center;}
+  .nC .nCh{background:var(--bg);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:0.1em;color:var(--ink-3);}
+  .nC .nCr{border-top:1px solid var(--line);font-size:15.5px;line-height:1.45;color:var(--ink-2);word-break:keep-all;padding-top:14px;padding-bottom:14px;}
+  .nC .nCr:first-of-type{border-top:none;}
+  .nC .nCn{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-0.01em;}
+  /* 15p — 흐름과 카드가 세로를 나눠 갖게 (기본 auto 여백이 가운데를 벌림) */
+  .s[data-label="LearnBridge 본문"] .flow{margin:auto 0;}
+  .s[data-label="LearnBridge 본문"] .flow .st{display:flex;flex-direction:column;justify-content:center;padding:34px 32px;min-height:250px;}
+  .s[data-label="LearnBridge 본문"] .flow .st > b{font-size:23px;}
+  .s[data-label="LearnBridge 본문"] .flow .st span{font-size:19px;}
+  .s[data-label="LearnBridge 본문"] .flow .fl{align-self:center;}
+
+  /* 3p — 주제를 제목으로, 결과 수치를 부제로 */
+  .s[data-label="HaruRoute 성능"] .subnum{margin:14px 0 0;font-size:34px;font-weight:800;
+       letter-spacing:-0.02em;line-height:1.2;color:var(--ink);word-break:keep-all;}
+  .s[data-label="HaruRoute 성능"] .subnum em{font-style:normal;color:var(--accent);}
+
+  /* 제목 앞 주제 프리픽스 (2026-09-09 컨설턴트 피드백: 주제를 제목에 노출) */
+  .claim .tp{color:var(--accent);font-weight:800;white-space:nowrap;}
+  .claim .tp.pill{background:rgba(47,75,216,0.1);border-radius:10px;padding:2px 18px 5px;margin-right:18px;}
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+  <!-- ════════════ 00 · 표지 (유지) ════════════ -->
+  <section class="s cover" data-label="표지" data-screen-label="00 표지">
+    <div class="eyebrow">IT Portfolio 2026</div>
+    <div class="who">방지섭 &nbsp;2001.03.06</div>
+
+    <h1 class="cv-h1"><span class="m">2년</span> <span class="g">1,429제</span>, <span class="m">4년</span> <span class="g">4.5학점</span></h1>
+    <p class="cv-sum">전공 81학점 전 과목 A+ · 백준 2년에 걸쳐 Platinum III</p>
+
+
+    <div class="cv-cols">
+      <div>
+        <div class="cv-lb">Contact</div>
+        <div class="cv-contact">
+          <span class="k">E-MAIL</span><span class="v">bjs0306b@gmail.com</span>
+          <span class="k">GITHUB</span><span class="v">github.com/bjs0306b</span>
+          <span class="k">BLOG</span><span class="v">velog.io/@bjs0306b</span>
+          <span class="k">BAEKJOON</span><span class="v">acmicpc.net/user/bjs0306b</span>
+          <span class="k">SOLVED.AC</span><span class="v">solved.ac/profile/bjs0306b</span>
+        </div>
+      </div>
+      <div>
+        <div class="cv-lb">Awards</div>
+        <div class="cv-list">
+          <div>SSAFY 2학기 공통 프로젝트 3등</div>
+          <div>SSAFY 1학기 성적우수상</div>
+          <div>최우등 졸업 학장상</div>
+          <div>INU 코드페스티벌 은상</div>
+        </div>
+      </div>
+      <div>
+        <div class="cv-lb">Certifications</div>
+        <div class="cv-cert">
+          <div><span class="cn">정보처리기사</span><span class="cd">2026.06.12</span></div>
+          <div><span class="cn">ADsP</span><span class="cd">2026.06.05</span></div>
+          <div><span class="cn">SQLD</span><span class="cd">2026.03.27</span></div>
+          <div><span class="cn">삼성 SW 역량테스트 B형</span><span class="cd">2026.03.14</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="cv-lb">Activity</div>
+        <div class="cv-cert">
+          <div><span class="cn">SSAFY 15기</span><span class="cd">2026.01 ~ 진행 중</span></div>
+          <div><span class="cn">INU 코드페스티벌 출제·검수</span><span class="cd">2025.07 ~ 2025.10</span></div>
+          <div><span class="cn">수학 학원 튜터</span><span class="cd">2023.07 ~ 2025.12</span></div>
+          <div><span class="cn">인천대학교 컴퓨터공학부</span><span class="cd">2020.03 ~ 2026.02</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cv-idx">
+      <div class="cv-idx-hd">
+        <div class="cv-lb" style="margin-bottom:0;">Projects</div>
+        <div class="cv-lb" style="margin-bottom:0;">Tech Stack</div>
+      </div>
+      <div class="cv-row"><span class="no">01</span><span class="nm">HaruRoute</span><span class="ds">RAG 챗봇 여행 플래너 &nbsp;백엔드 · 인프라 · AI</span><span class="st">Spring &nbsp;FastAPI &nbsp;k3s</span></div>
+      <div class="cv-row"><span class="no">02</span><span class="nm">F.A.S.T.</span><span class="ds">무인 지게차 적재 자동화 &nbsp;스크럼 마스터 · AI · 비전</span><span class="st">PyTorch &nbsp;TensorRT &nbsp;ROS 2</span></div>
+      <div class="cv-row"><span class="no">03</span><span class="nm">HairFolio</span><span class="ds">외주 1인 풀스택 &nbsp;웹 · 앱 · 서버</span><span class="st">Spring Boot &nbsp;React &nbsp;React Native</span></div>
+      <div class="cv-row"><span class="no">04</span><span class="nm">LearnBridge</span><span class="ds">RBAC 통합 학사관리 LMS &nbsp;인증 · 인가 · E2E</span><span class="st">React &nbsp;Playwright</span></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 04 · HaruRoute 인트로 ════════════ -->
+  <section class="s intro" data-label="HaruRoute 인트로" data-screen-label="01 HaruRoute 인트로">
+    <div class="ihd">
+      <span class="ino">Project 01</span>
+      <h1>HaruRoute</h1>
+      <span class="idef">공공데이터 관광지에 RAG 챗봇을 붙인 여행 플래너</span>
+    </div>
+
+    <div class="mid">
+      <div class="arch dgm">
+        <svg class="dg" viewBox="0 0 480 700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><marker id="ahH" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-3)"/></marker></defs>
+
+          <rect x="0" y="0" width="480" height="50" rx="10" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="16" y="32" font-size="19" font-weight="700" fill="var(--ink)">Vue 3 프론트</text>
+          <text x="150" y="32" font-size="17" fill="var(--ink-2)">지도 · 경로 편집 · 챗봇 화면</text>
+
+          <line x1="240" y1="50" x2="240" y2="86" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahH)"/>
+          <text x="254" y="74" font-size="16" fill="var(--ink-2)">Traefik · /api → backend</text>
+
+          <rect x="0" y="90" width="288" height="270" rx="12" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="16" y="120" font-size="21" font-weight="800" fill="var(--ink)">Spring Boot API</text>
+
+          <rect x="16" y="136" width="256" height="64" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="30" y="162" font-size="18" font-weight="700" fill="var(--ink)">관광지 검색 · 50,686건</text>
+          <text x="30" y="186" font-size="16" fill="var(--ink-2)">복합 인덱스 · FULLTEXT · 100건</text>
+
+          <rect x="16" y="208" width="256" height="64" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="30" y="234" font-size="18" font-weight="700" fill="var(--ink)">Redis 캐싱</text>
+          <text x="30" y="258" font-size="16" fill="var(--ink-2)">spots 30분 · route(TSP) 1시간</text>
+
+          <rect x="16" y="280" width="256" height="64" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="30" y="306" font-size="18" font-weight="700" fill="var(--ink)">관광지 동기화 스케줄러</text>
+          <text x="30" y="330" font-size="16" fill="var(--ink-2)">매일 03:00 · Bulk Upsert · 90%↓</text>
+
+          <rect x="304" y="90" width="176" height="270" rx="12" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="320" y="120" font-size="21" font-weight="800" fill="var(--ink)">FastAPI RAG</text>
+          <rect x="320" y="136" width="144" height="64" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="334" y="162" font-size="17" font-weight="700" fill="var(--ink)">ChromaDB</text>
+          <text x="334" y="186" font-size="16" fill="var(--ink-2)">MiniLM 임베딩</text>
+          <rect x="320" y="208" width="144" height="64" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="334" y="234" font-size="17" font-weight="700" fill="var(--ink)">Claude Sonnet</text>
+          <text x="334" y="258" font-size="16" fill="var(--ink-2)">멀티턴 · 폴백</text>
+          <rect x="320" y="280" width="144" height="64" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="334" y="306" font-size="17" font-weight="700" fill="var(--ink)">RAG 문서</text>
+          <text x="334" y="330" font-size="16" fill="var(--ink-2)">DB → 매일 갱신</text>
+
+          <line x1="150" y1="360" x2="150" y2="400" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahH)"/>
+          <text x="164" y="386" font-size="16" fill="var(--ink-2)">JDBC</text>
+          <line x1="392" y1="360" x2="392" y2="400" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahH)"/>
+
+          <rect x="0" y="404" width="480" height="72" rx="10" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="16" y="434" font-size="19" font-weight="700" fill="var(--ink)">Amazon RDS · MySQL</text>
+          <text x="16" y="460" font-size="16" fill="var(--ink-2)">관광지 50,686건 · Flyway 마이그레이션 · 앱과 DB 분리</text>
+
+          <rect x="0" y="504" width="480" height="150" rx="12" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="7 5"/>
+          <text x="16" y="534" font-size="21" font-weight="800" fill="var(--ink)">인프라 · 운영</text>
+
+          <rect x="16" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="85" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">Jenkins CI</text>
+          <text x="85" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">빌드 → ECR</text>
+          <line x1="154" y1="580" x2="170" y2="580" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahH)"/>
+
+          <rect x="171" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="240" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">k3s · EC2</text>
+          <text x="240" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">HPA 2→4 · 무중단</text>
+          <line x1="309" y1="580" x2="325" y2="580" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahH)"/>
+
+          <rect x="326" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="395" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">Grafana</text>
+          <text x="395" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">Discord 알림</text>
+
+          <text x="16" y="638" font-size="16" fill="var(--ink-2)">k6 부하 테스트 · 100 → 1,000 VU · 3p</text>
+
+          <rect x="0" y="676" width="16" height="16" rx="3" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="24" y="689" font-size="16" font-weight="700" fill="var(--ink-2)">내 담당</text>
+        </svg>
+      </div>
+
+      <div class="shots">
+        <div class="shot">
+          <img src="./assets/haru_screen_chatbot_zoom.jpg" alt="동선 짜기 화면과 AI 여행 도우미 패널">
+          <div class="cap"><b>AI 여행 도우미</b> · 답변의 장소를 클릭 한 번으로 경로에 추가</div>
+        </div>
+        <div class="shot">
+          <img src="./assets/haru_screen_home.jpg" alt="동선 짜기 화면">
+          <div class="cap"><b>동선 짜기</b> · 지역·타입 필터 + 지도에서 경로 편집</div>
+        </div>
+        <div class="shot">
+          <img src="./assets/haru_screen_library.jpg" alt="내 동선 기록 화면">
+          <div class="cap"><b>내 동선 기록</b> · 저장한 경로와 거리</div>
+        </div>
+        <div class="shot">
+          <img src="./assets/discord_alert.png" alt="Discord 임계 초과 알림">
+          <div class="cap"><b class="no">FIRING · CPU 94.5%</b> 임계 80% 초과</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div><div class="mk">Role</div><div class="mv">백엔드 · 인프라 · AI</div></div>
+      <div><div class="mk">Team</div><div class="mv">3인 · SSAFY 1학기 관통 PJT</div></div>
+      <div><div class="mk">Period</div><div class="mv">2026.05.12 ~ 2026.06.29</div></div>
+      <div><div class="mk">Stack</div><div class="mv">Spring Boot · FastAPI · MySQL · Redis · k3s · k6</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 05 · HaruRoute 성능 ════════════ -->
+  <section class="s" data-label="HaruRoute 성능" data-screen-label="02 HaruRoute 성능">
+    <div class="top">
+      <span class="no">Project 01 &nbsp;HaruRoute</span>
+      <span class="pg">03 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">부하 테스트</span> 병목을 <em>하나씩 소거</em></h2>
+    <p class="subnum">100 VU · p95 1,310ms · 에러 49% → <em>1,000 VU · 315ms · 0%</em></p>
+
+    <div class="cards n5">
+      <div class="card">
+        <div class="kv">10 → 20</div>
+        <h3>① 커넥션 풀 고갈</h3>
+        <p>pod를 늘려도 p95 불변 → 병목은 CPU가 아니라 DB I/O. HikariCP 풀을 키워 에러율 <b>48.99% → 24.70%</b>, p95 1,310 → 1,130ms.</p>
+      </div>
+      <div class="card">
+        <div class="kv">17<small>MB/s</small></div>
+        <h3>② 응답 크기 제한</h3>
+        <p>spots가 456건(≈175KB)을 한 번에 내려보내 100 VU에서 네트워크 포화. 100건 제한만으로 p95 1,130ms → <span class="pos">22ms</span>. 에러율은 그대로.</p>
+      </div>
+      <div class="card">
+        <div class="kv">1,350 → 454<small>ms</small></div>
+        <h3>③ Redis 캐싱 · 대상 분리</h3>
+        <p>Redis 캐싱 — spots 결과(TTL 30분)는 쿼리를, route(TTL 1시간)는 DB를 안 쓰는 <b>TSP 연산 자체를 생략.</b> route p95 기준.</p>
+      </div>
+      <div class="card">
+        <div class="kv">2 → 4</div>
+        <h3>④ HPA 스케일아웃</h3>
+        <p>HPA(CPU 70% 초과 시 pod 2 → 4). 캐시가 식어 CPU가 뛰는 구간의 보완책 — I/O 병목엔 무효, CPU 병목엔 유효.</p>
+      </div>
+      <div class="card warn">
+        <div class="kv">400</div>
+        <h3>⑤ k6 인코딩 버그 분리</h3>
+        <p>k6가 한글 파라미터를 인코딩하지 않고 보내 받은 응답. <code>encodeURIComponent</code> 한 줄로 <b>0%</b> — 테스트가 만든 에러를 걷어내야 진짜 서버 에러가 보임.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ════════════ 06 · HaruRoute 시스템 ════════════ -->
+  <section class="s one" data-label="HaruRoute 시스템" data-screen-label="03 HaruRoute 시스템">
+    <div class="top">
+      <span class="no">Project 01 &nbsp;HaruRoute</span>
+      <span class="pg">04 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">RAG</span> 챗봇의 답이 되는 관광지 <em>50,686건</em></h2>
+    <p class="lead">DB가 곧 RAG 문서 · 매일 새벽 재생성 → 항상 최신 공식 명칭.</p>
+
+    <div class="bh2"><b>RAG</b><span>FastAPI · ChromaDB(MiniLM) · Claude Sonnet</span></div>
+    <div class="vflow">
+      <div class="st"><b>① 관광지 DB → RAG 문서</b><span>MySQL 관광지 50,686건으로 RAG 문서 자동 생성, 매일 03:30 갱신 · 동기화는 Bulk Upsert로 오버헤드 90%↓.</span></div>
+      <div class="ar">↓</div>
+      <div class="st"><b>② 임베딩 검색 · ChromaDB</b><span>MiniLM 임베딩으로 ChromaDB에서 검색. 멀티턴 대화 유지, 외부 호출이 흔들리면 Circuit Breaker로 전환.</span></div>
+      <div class="ar">↓</div>
+      <div class="st last"><b>③ 경로 원클릭 추가</b><span>답변의 장소명이 <b>공식명칭과 일치</b>해 클릭 한 번으로 경로에 추가.</span></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 04 · HaruRoute 인프라 ════════════ -->
+  <section class="s one" data-label="HaruRoute 인프라" data-screen-label="04 HaruRoute 인프라">
+    <div class="top">
+      <span class="no">Project 01 &nbsp;HaruRoute</span>
+      <span class="pg">05 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">인프라</span> 겪은 문제로 정한 <em>다음 단계</em></h2>
+    <p class="lead">환경 차이 → 컨테이너, 자원 경합 → 오케스트레이션.</p>
+
+    <div class="flow dia">
+      <div class="st">
+        <b>① 로컬</b>
+        <span>팀원 간 환경 차이로 같은 코드가 다르게 동작 → 컨테이너로 통일.</span>
+        <svg class="dg" viewBox="0 0 520 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><marker id="ah5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-3)"/></marker></defs>
+          <g font-family="Pretendard, sans-serif" fill="var(--ink-2)">
+            <rect x="0" y="0" width="520" height="58" rx="10" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+            <text x="18" y="37" font-size="22" font-weight="700" fill="var(--ink)">같은 코드</text>
+            <text x="130" y="37" font-size="19">frontend · backend · ai_server · 하나의 git</text>
+
+            <line x1="260" y1="58" x2="80" y2="112" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ah5a)"/>
+            <line x1="260" y1="58" x2="260" y2="112" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ah5a)"/>
+            <line x1="260" y1="58" x2="440" y2="112" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ah5a)"/>
+
+            <rect x="0" y="116" width="160" height="176" rx="10" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+            <text x="16" y="146" font-size="22" font-weight="700" fill="var(--ink)">PC A</text>
+            <text x="16" y="178" font-size="18">Java · Node</text>
+            <text x="16" y="204" font-size="18">Python · MySQL</text>
+            <text x="16" y="230" font-size="17" fill="var(--ink-3)">각자 설치한 버전</text>
+            <text x="16" y="272" font-size="20" font-weight="800" fill="var(--pos)">✓ 동작</text>
+
+            <rect x="180" y="116" width="160" height="176" rx="10" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+            <text x="196" y="146" font-size="22" font-weight="700" fill="var(--ink)">PC B</text>
+            <text x="196" y="178" font-size="18">Java · Node</text>
+            <text x="196" y="204" font-size="18">Python · MySQL</text>
+            <text x="196" y="230" font-size="17" fill="var(--ink-3)">각자 설치한 버전</text>
+            <text x="196" y="272" font-size="20" font-weight="800" fill="var(--neg)">✗ 실패</text>
+
+            <rect x="360" y="116" width="160" height="176" rx="10" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+            <text x="376" y="146" font-size="22" font-weight="700" fill="var(--ink)">PC C</text>
+            <text x="376" y="178" font-size="18">Java · Node</text>
+            <text x="376" y="204" font-size="18">Python · MySQL</text>
+            <text x="376" y="230" font-size="17" fill="var(--ink-3)">각자 설치한 버전</text>
+            <text x="376" y="272" font-size="20" font-weight="800" fill="var(--neg)">✗ 실패</text>
+
+            <text x="260" y="356" text-anchor="middle" font-size="20" fill="var(--neg)" font-weight="700">PC마다 Java · Node · Python · MySQL 버전이 다름</text>
+            <text x="260" y="388" text-anchor="middle" font-size="19" fill="var(--ink-3)">"내 PC에선 되는데"</text>
+          </g>
+        </svg>
+      </div>
+      <div class="ar">→</div>
+      <div class="st">
+        <b>② Docker Compose · 단일 EC2</b>
+        <span>포트 충돌과 OOM 발생. AI 이미지를 10GB → 2GB로 줄였지만 한 대에 다 올린 구조 자체가 한계.</span>
+        <svg class="dg" viewBox="0 0 520 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <g font-family="Pretendard, sans-serif" fill="var(--ink-2)">
+            <rect x="0" y="10" width="520" height="326" rx="12" fill="var(--bg)" stroke="var(--line)"/>
+            <text x="18" y="42" font-size="22" font-weight="700" fill="var(--ink)">EC2 t2.small · 한 대</text>
+            <rect x="14" y="56" width="492" height="198" rx="10" fill="var(--surface)" stroke="var(--accent)" stroke-dasharray="6 5"/>
+            <text x="30" y="80" font-size="17" fill="var(--accent)" font-weight="700">docker compose up</text>
+            <rect x="28" y="92" width="232" height="70" rx="8" fill="var(--bg)" stroke="var(--line)"/><text x="144" y="121" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">frontend</text><text x="144" y="148" text-anchor="middle" font-size="18">nginx :80</text>
+            <rect x="274" y="92" width="232" height="70" rx="8" fill="var(--bg)" stroke="var(--line)"/><text x="390" y="121" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">backend</text><text x="390" y="148" text-anchor="middle" font-size="18">Spring :8080</text>
+            <rect x="28" y="172" width="232" height="70" rx="8" fill="var(--bg)" stroke="var(--line)"/><text x="144" y="201" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">ai_server</text><text x="144" y="228" text-anchor="middle" font-size="18">10GB → 2GB</text>
+            <rect x="274" y="172" width="232" height="70" rx="8" fill="var(--bg)" stroke="var(--line)"/><text x="390" y="201" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">mysql</text><text x="390" y="228" text-anchor="middle" font-size="18">컨테이너</text>
+            <rect x="14" y="266" width="492" height="56" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+            <text x="260" y="301" text-anchor="middle" font-size="20" fill="var(--ink)"><tspan font-weight="700">Jenkins</tspan> · CI 겸용 · 같은 EC2</text>
+            <text x="260" y="380" text-anchor="middle" font-size="20" fill="var(--neg)" font-weight="700">포트 충돌 · OOM · CI와 런타임의 자원 경합</text>
+          </g>
+        </svg>
+      </div>
+      <div class="ar">→</div>
+      <div class="st last">
+        <b>③ k3s · RDS · ECR</b>
+        <span>3-tier로 책임 분리, 무중단 배포·Health Probe·PDB·Rate Limiting 적용. 지표는 Grafana, 알림은 Discord.</span>
+        <svg class="dg" viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <g font-family="Pretendard, sans-serif" fill="var(--ink-2)">
+            <rect x="0" y="4" width="170" height="46" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+            <text x="85" y="34" text-anchor="middle" font-size="20" fill="var(--ink)"><tspan font-weight="700">ECR</tspan> · 이미지</text>
+            <line x1="85" y1="50" x2="85" y2="62" stroke="var(--ink-3)" stroke-width="1.5"/><polygon points="81,62 85,70 89,62" fill="var(--ink-3)"/>
+            <rect x="0" y="70" width="520" height="216" rx="12" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="16" y="100" font-size="22" font-weight="700" fill="var(--accent)">EC2 t2.medium · k3s</text>
+            <rect x="14" y="112" width="492" height="46" rx="8" fill="var(--bg)" stroke="var(--line)"/>
+            <text x="260" y="142" text-anchor="middle" font-size="19" fill="var(--ink)"><tspan font-weight="700">Traefik Ingress</tspan> · / → frontend · /api → backend</text>
+            <rect x="14" y="170" width="115" height="88" rx="8" fill="var(--bg)" stroke="var(--line)"/><text x="71" y="208" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)">frontend</text><text x="71" y="236" text-anchor="middle" font-size="15">pod</text>
+            <rect x="139" y="170" width="115" height="88" rx="8" fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/><text x="196" y="208" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)">backend</text><text x="196" y="236" text-anchor="middle" font-size="15" fill="var(--accent)" font-weight="700">HPA 2 → 4</text>
+            <rect x="264" y="170" width="115" height="88" rx="8" fill="var(--bg)" stroke="var(--line)"/><text x="321" y="208" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)">ai-server</text><text x="321" y="236" text-anchor="middle" font-size="15">pod</text>
+            <rect x="389" y="170" width="115" height="88" rx="8" fill="var(--bg)" stroke="var(--line)"/><text x="446" y="208" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)">redis</text><text x="446" y="236" text-anchor="middle" font-size="15">캐시</text>
+            <line x1="196" y1="286" x2="196" y2="304" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="4 3"/><polygon points="192,304 196,312 200,304" fill="var(--ink-3)"/>
+            <rect x="106" y="312" width="180" height="46" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+            <text x="196" y="342" text-anchor="middle" font-size="20" fill="var(--ink)"><tspan font-weight="700">RDS</tspan> · MySQL</text>
+            <rect x="302" y="312" width="218" height="46" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+            <text x="411" y="332" text-anchor="middle" font-size="15" fill="var(--ink)"><tspan font-weight="700">Prometheus · Grafana</tspan></text>
+            <text x="411" y="350" text-anchor="middle" font-size="14" fill="var(--ink-3)">Jenkins EC2 · Docker → Discord</text>
+            <text x="260" y="404" text-anchor="middle" font-size="20" fill="var(--pos)" font-weight="700">앱(k3s) · DB(RDS) · 이미지(ECR)를 층으로 분리</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 05 · HaruRoute 트러블슈팅 ════════════ -->
+  <section class="s" data-label="HaruRoute 트러블슈팅" data-screen-label="05 HaruRoute 트러블슈팅">
+    <div class="top">
+      <span class="no">Project 01 &nbsp;HaruRoute</span>
+      <span class="pg">06 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">트러블슈팅</span> 에러 없이 조용히 어긋난 <em>세 건</em></h2>
+    <p class="lead">로그가 아니라 동작으로 발견.</p>
+
+    <div class="tmx">
+      <div class="trow trh">
+        <div class="rl"></div>
+        <div class="rc"><b>ECR 토큰 만료</b></div>
+        <div class="rc"><b>Grafana 알람</b></div>
+        <div class="rc"><b>배치 기준일</b></div>
+      </div>
+      <div class="trow">
+        <div class="rl">보인 것</div>
+        <div class="rc">ImagePullBackOff · 다음 날 배포 실패</div>
+        <div class="rc">CPU가 올라도 알림 없음</div>
+        <div class="rc">매일 같은 날짜로 정리</div>
+      </div>
+      <div class="trow tcz">
+        <div class="rl">원인</div>
+        <div class="rc"><b>ECR 토큰 12h 만료</b>containerd가 IAM 인증을 모름</div>
+        <div class="rc"><b>다중 시리즈 미평가</b>threshold는 스칼라 하나만 받는데 pod마다 시리즈가 와 매 평가가 오류 → 상태가 Normal로 남음</div>
+        <div class="rc"><b>싱글톤 빈에 기준일 고정</b>재기동 전까지 그대로</div>
+      </div>
+      <div class="trow tfz">
+        <div class="rl">해결</div>
+        <div class="rc"><code>registries.yaml</code> · IAM · cron 갱신</div>
+        <div class="rc"><code>classic_conditions</code>CPU 80 / Heap 85 / 5xx 5% 실측</div>
+        <div class="rc"><code>@StepScope</code> · 실행 시점 바인딩</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 01 · F.A.S.T. 인트로 ════════════ -->
+  <section class="s intro" data-label="F.A.S.T. 인트로" data-screen-label="06 F.A.S.T. 인트로">
+    <div class="ihd">
+      <span class="ino">Project 02</span>
+      <h1>F.A.S.T.</h1>
+      <span class="idef">1/10 스케일 실물 창고에서 도는 무인 지게차 물류 자동화</span>
+    </div>
+
+    <div class="mid">
+      <div class="arch dgm">
+        <svg class="dg" viewBox="0 0 480 700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><marker id="ahF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-3)"/></marker></defs>
+
+          <rect x="0" y="0" width="480" height="96" rx="12" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="16" y="30" font-size="21" font-weight="800" fill="var(--ink)">측정 스테이션 · RTMDet-m</text>
+          <text x="16" y="56" font-size="16" fill="var(--ink-2)">박스 · 파렛트 검출 → 적재 높이 · 전복 위험 · 편하중</text>
+          <text x="16" y="80" font-size="16" fill="var(--ink-2)">카메라 + TF-Nova 거리 · 실물 파렛트로 판정</text>
+
+          <line x1="240" y1="96" x2="240" y2="132" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahF)"/>
+          <text x="254" y="120" font-size="16" fill="var(--ink-2)">REST · 치수 · 판정 JSON</text>
+
+          <rect x="0" y="136" width="480" height="76" rx="10" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="16" y="166" font-size="19" font-weight="700" fill="var(--ink)">백엔드 · Spring</text>
+          <text x="16" y="194" font-size="16" fill="var(--ink-2)">적재 위치 배정 · 작업 배정 · 교통 제어(실물 검증 참여)</text>
+
+          <line x1="240" y1="212" x2="240" y2="248" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahF)"/>
+          <text x="254" y="236" font-size="16" fill="var(--ink-2)">MQTT · 목적지 · STOP / RESUME</text>
+
+          <rect x="0" y="252" width="480" height="236" rx="12" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="16" y="282" font-size="21" font-weight="800" fill="var(--ink)">무인 지게차 · 1/10 스케일</text>
+
+          <rect x="16" y="296" width="448" height="54" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="30" y="319" font-size="18" font-weight="700" fill="var(--ink)">ROS 2 · Nav2</text>
+          <text x="170" y="319" font-size="16" fill="var(--ink-2)">LiDAR 자율주행 · 목적지까지 이동</text>
+          <text x="30" y="341" font-size="15" fill="var(--ink-3)">차량 주행 계층</text>
+
+          <rect x="16" y="362" width="448" height="112" rx="10" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <rect x="26" y="371" width="212" height="94" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="40" y="397" font-size="18" font-weight="700" fill="var(--ink)">Jetson · RTMDet-s</text>
+          <text x="40" y="420" font-size="16" fill="var(--ink-2)">TensorRT FP16 · 22 fps</text>
+          <text x="40" y="442" font-size="16" fill="var(--ink-2)">HTTP 추론 서버 · systemd</text>
+
+          <rect x="242" y="371" width="212" height="94" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="256" y="397" font-size="18" font-weight="700" fill="var(--ink)">포크 정렬 · 삽입</text>
+          <text x="256" y="420" font-size="16" fill="var(--ink-2)">구멍 중심 오차 → 조향</text>
+          <text x="256" y="442" font-size="16" fill="var(--ink-2)">ESP32 서보 펌웨어</text>
+
+          <rect x="0" y="510" width="232" height="140" rx="12" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="16" y="540" font-size="19" font-weight="800" fill="var(--ink)">관제 화면</text>
+          <text x="16" y="568" font-size="16" fill="var(--ink-2)">Next.js · 실시간 영상</text>
+          <text x="16" y="592" font-size="16" fill="var(--ink-2)">전복 등급 · 검출 오버레이</text>
+          <text x="16" y="626" font-size="16" fill="var(--accent)" font-weight="700">영상 송출 · 부분 참여</text>
+
+          <rect x="248" y="510" width="232" height="140" rx="12" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="264" y="540" font-size="19" font-weight="800" fill="var(--ink)">디지털 트윈</text>
+          <text x="264" y="568" font-size="16" fill="var(--ink-2)">Isaac Sim · 창고 · 차량</text>
+          <text x="264" y="592" font-size="16" fill="var(--ink-2)">MQTT 위치 · 상태 동기화</text>
+
+          <rect x="0" y="676" width="16" height="16" rx="3" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="24" y="689" font-size="16" font-weight="700" fill="var(--ink-2)">내 담당</text>
+        </svg>
+      </div>
+
+      <div class="shots rows">
+        <div class="srow">
+          <div class="rl"><span class="n">01</span><b>측정 스테이션</b></div>
+          <div class="rg">
+            <div class="shot">
+              <img src="./assets/fast_tipping_safe.webp" alt="전복 안전 판정">
+              <div class="cap"><b>TIPPING: SAFE</b> 화물이 파렛트 중앙 · 여유 96%</div>
+            </div>
+            <div class="shot">
+              <img src="./assets/fast_tipping_danger.webp" alt="전복 위험 판정">
+              <div class="cap"><b class="no">TIPPING: DANGER</b> 한쪽으로 편심 68% · 여유 32%</div>
+            </div>
+          </div>
+        </div>
+        <div class="srow">
+          <div class="rl"><span class="n">02</span><b>무인 지게차</b></div>
+          <div class="rg">
+            <div class="shot">
+              <img src="./assets/fast_onboard_hole.png" alt="온보드 구멍 검출">
+              <div class="cap"><b>pallet 1 · hole 2</b> 차량 카메라가 본 화면</div>
+            </div>
+            <div class="shot cut">
+              <img src="./assets/fast_forklift_cut.png" alt="미니어처 무인 지게차">
+              <div class="cap">그 카메라를 실은 1/10 스케일 지게차 · Jetson · LiDAR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div><div class="mk">Role</div><div class="mv">스크럼 마스터 · AI · 비전 · 온보드 제어</div></div>
+      <div><div class="mk">Team</div><div class="mv">6인 · <code>ai/</code> 20,287줄 중 17,883줄</div></div>
+      <div><div class="mk">Period</div><div class="mv">2026.07 ~ 08 · SSAFY 공통 PJT 3등</div></div>
+      <div><div class="mk">Stack</div><div class="mv">PyTorch · ONNX · TensorRT · Jetson · MQTT · ROS 2</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 05 · F.A.S.T. 설계·운영 ════════════ -->
+  <section class="s" data-label="F.A.S.T. 설계" data-screen-label="07 F.A.S.T. 설계">
+    <div class="top">
+      <span class="no">Project 02 &nbsp;F.A.S.T.</span>
+      <span class="pg">08 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">스크럼 마스터</span> AI에 붙이기 전에 쓴 요구사항 명세 <em>600줄</em></h2>
+    <p class="lead">AI는 잘못된 요구사항도 빠르게 구현 → 착수 전에 명세부터.</p>
+
+    <div class="cards n3">
+      <div class="card">
+        <div class="kv">600<small>줄</small></div>
+        <h3>요구사항 명세 선행</h3>
+        <p>기능 요구사항을 <code>FR-101-1</code>처럼 계층 번호로 쪼갠 명세. 실물을 만지며 결정이 바뀔 때마다 함께 수정.</p>
+      </div>
+      <div class="card">
+        <div class="kv">1 : 1</div>
+        <h3>명세 번호 = Jira 이슈 제목</h3>
+        <p>번호 하나로 명세·이슈·브랜치·MR이 연결. 이 이슈가 명세 어디에서 나왔는지 항상 추적 가능.</p>
+      </div>
+      <div class="card">
+        <div class="kv">100<small>건 배정</small></div>
+        <h3>에픽·스토리 분해 · 배정</h3>
+        <p>명세를 에픽·스토리로 쪼개 팀원 5명에게 배정. 임베디드·ROS 2는 내 전문 밖이라 담당 팀원 두 명의 검토를 거쳐 명세 확정.</p>
+      </div>
+    </div>
+
+    <div class="kpi n3">
+      <div><div class="v">334 / 572</div><div class="k">팀 커밋 중 내 커밋 · develop 기준 58%</div></div>
+      <div><div class="v">62<span style="font-size:19px;">건</span></div><div class="k">담당 Jira 이슈 · 전량 완료</div></div>
+      <div><div class="v">3<span style="font-size:19px;">회</span></div><div class="k">KPT 회고 · 스프린트마다</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 06 · F.A.S.T. 운영 ════════════ -->
+  <section class="s ops" data-label="F.A.S.T. 운영" data-screen-label="08 F.A.S.T. 운영">
+    <div class="top">
+      <span class="no">Project 02 &nbsp;F.A.S.T.</span>
+      <span class="pg">09 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">배포 · 운영</span> <em>안정성</em>은 주의력이 아니라 구조로</h2>
+    <p class="lead">제어 주기 미달 · 재부팅 미기동 · 결과 오귀속 — 그때그때가 아니라 구조로.</p>
+
+    <div class="two">
+      <div class="col">
+        <div class="bh2"><b>실행 환경</b><span>실물 운행에서 드러난 세 지점</span></div>
+        <div class="stack">
+          <div class="card">
+            <div class="kv">10 → 22.2<small>fps</small></div>
+            <h3>제어 주기 미달 · TensorRT 전환</h3>
+            <p>젯슨 Orin Nano에서 10 fps 미달. ONNX를 <b>TensorRT FP16</b>으로 변환해 Tensor Core를 태우고 전처리를 정리해 <b>엔진 10.18ms · 종단 44.96ms</b>.</p>
+          </div>
+          <div class="card">
+            <div class="kv">5<small>회 / 5분</small></div>
+            <h3>systemd 자동 기동 · 재시작 상한</h3>
+            <p>재부팅 후 추론 서버가 안 뜨는 것을 실측하고 <code>systemd</code>에 등록. CUDA 컨텍스트를 못 잡는 실패는 재시작해도 계속 실패하므로 <b>5분에 5회로 상한</b>.</p>
+          </div>
+          <div class="card">
+            <div class="kv">sessionId</div>
+            <h3>지연 결과 오귀속 · 세션 ID</h3>
+            <p>측정 결과가 늦게 도착하면 <span class="neg">다음 작업의 결과로 잘못 귀속</span>. 세션 발급을 필수로 만들고 활성 세션과 다르면 서버가 거부하도록 규격에 반영.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="bh2"><b>배포 파이프라인</b><span>GitLab CI · develop 자동배포</span></div>
+        <div class="vflow">
+          <div class="st"><b>① 빌드 · 테스트</b><span><code>./mvnw clean package</code>가 테스트까지 수행. 실패 시 배포 중단이라 <b>돌던 컨테이너는 무손상.</b></span></div>
+          <div class="ar">↓</div>
+          <div class="st"><b>② 이미지 교체</b><span>통과분만 배포 대상. 배포 관련 변경에만 트리거가 걸리도록 범위 한정.</span></div>
+          <div class="ar">↓</div>
+          <div class="st last"><b>③ 헬스체크 · 롤백</b><span>기동 후 헬스체크 실패면 <b>직전 이미지로 롤백.</b> 롤백은 <code>trap</code>이 아니라 명시 호출 — "적혀만 있고 한 번도 안 도는 것"을 막기 위해.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 07 · F.A.S.T. 비전 파이프라인 ════════════ -->
+  <section class="s vis" data-label="F.A.S.T. 비전" data-screen-label="09 F.A.S.T. 비전 파이프라인">
+    <div class="top">
+      <span class="no">Project 02 &nbsp;F.A.S.T.</span>
+      <span class="pg">10 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">AI · 비전</span> 요구가 다르면 <em>모델도 다르게</em></h2>
+    <p class="lead">스테이션은 <b>크기·전복 판정</b>, 온보드는 <b>포크 위치</b> — 답이 달라 모델도 분리.</p>
+
+    <div class="cards n2">
+      <div class="card">
+        <div class="kv">RTMDet-m<small>@800 · TensorRT FP32</small></div>
+        <h3>스테이션 · 크기와 전복 여부</h3>
+        <p>box·pallet을 함께 검출 → 박스 픽셀 높이 × 거리계 거리 ÷ 초점거리로 실제 높이 산출 → 파렛트 절반 폭에서 치우친 정도로 <b>SAFE / DANGER</b> 판정.</p>
+      </div>
+      <div class="card">
+        <div class="kv">RTMDet-s<small>@640 · TensorRT FP16</small></div>
+        <h3>온보드 · 포크 삽입 위치</h3>
+        <p>파렛트가 아니라 <b>포크가 들어갈 구멍 두 개</b>를 검출 → 두 구멍의 화면 좌표로 좌우 오차와 틀어진 각도를 구해 주행 명령 생성 → <code>SEARCH → APPROACH → ALIGN → VERIFY → INSERT</code>, 실패 시 후퇴 후 재접근.</p>
+      </div>
+    </div>
+
+    <div class="bh2"><b>학습 사이클</b><span>데이터 보강 → 실물 평가 → 승격</span></div>
+    <div class="flow">
+      <div class="st"><b>① 공개 데이터 + 자체 촬영 572장</b><span>학습셋 <b>20,565장</b>의 뼈대는 공개 데이터(LOCO·SCD). 목재 파렛트뿐이라 <b>검은 플라스틱은 임계 0.02에서도 검출 0건</b> — 리그에서 직접 촬영·라벨링한 <b>572장</b>(리그 289 + 가림 283)으로 도메인 파인튜닝.</span></div>
+      <div class="ar">→</div>
+      <div class="st"><b>② 실물 리그 평가셋</b><span>KPI 판정 무대를 공개 데이터셋에서 <b>실물 리그 평가셋으로 이전.</b> 배포 환경과 평가 환경을 맞추기 위해.</span></div>
+      <div class="ar">→</div>
+      <div class="st last"><b>③ 승격 게이트 3조건</b><span>교체 조건은 착수 전에 고정 — 목표 지표·회귀 없음·망각 없음. 공개 데이터로 동률이던 두 실험이 <b>실물 리그 12프레임에서 11/12 대 12/12로 판가름.</b></span></div>
+    </div>
+
+    <div class="kpi">
+      <div><div class="v">0.66mm</div><div class="k">화물 치수 오차 · 실물 박스 6.6mm의 1/10 환산 · 요구는 4mm 이내</div></div>
+      <div><div class="v">44.96ms</div><div class="k">온보드 추론 종단 · 제어 루프 예산 100ms</div></div>
+      <div><div class="v">99.5%</div><div class="k">구멍 재현율 220/221 · 요구는 95% 이상</div></div>
+      <div><div class="v">100%</div><div class="k">파렛트 재현율 105/105 · 요구는 98% 이상 · 네거티브 120장 오탐 0건</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 07 · HairFolio 인트로 ════════════ -->
+  <section class="s intro" data-label="HairFolio 인트로" data-screen-label="10 HairFolio 인트로">
+    <div class="ihd">
+      <span class="ino">Project 03</span>
+      <h1>HairFolio</h1>
+      <span class="idef">외주 · 기획을 뺀 전 영역을 21일 동안 단독 개발</span>
+    </div>
+
+    <div class="mid">
+      <div class="arch dgm">
+        <svg class="dg" viewBox="0 0 480 700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><marker id="ahR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-3)"/></marker></defs>
+
+          <rect x="0" y="0" width="232" height="70" rx="10" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="16" y="30" font-size="19" font-weight="700" fill="var(--ink)">웹 · React</text>
+          <text x="16" y="54" font-size="16" fill="var(--ink-2)">TypeScript · Vite → Vercel</text>
+          <rect x="248" y="0" width="232" height="70" rx="10" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="264" y="30" font-size="19" font-weight="700" fill="var(--ink)">앱 · React Native</text>
+          <text x="264" y="54" font-size="16" fill="var(--ink-2)">Expo → EAS Build APK</text>
+
+          <line x1="116" y1="70" x2="116" y2="106" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahR)"/>
+          <line x1="364" y1="70" x2="364" y2="106" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahR)"/>
+          <text x="240" y="94" text-anchor="middle" font-size="16" fill="var(--ink-2)">REST · 동일 API 계약</text>
+
+          <rect x="0" y="110" width="480" height="250" rx="12" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="16" y="140" font-size="21" font-weight="800" fill="var(--ink)">Spring Boot 3.5 · Cloud Run</text>
+
+          <rect x="16" y="156" width="218" height="88" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="30" y="184" font-size="18" font-weight="700" fill="var(--ink)">도메인 27개</text>
+          <text x="30" y="208" font-size="16" fill="var(--ink-2)">JPA · Hibernate 6</text>
+          <text x="30" y="230" font-size="16" fill="var(--ink-2)">테스트 303 케이스</text>
+
+          <rect x="246" y="156" width="218" height="88" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="260" y="184" font-size="18" font-weight="700" fill="var(--ink)">인증 · 인가</text>
+          <text x="260" y="208" font-size="16" fill="var(--ink-2)">JWT · 리프레시 토큰</text>
+          <text x="260" y="230" font-size="16" fill="var(--ink-2)">역할별 세분 인가</text>
+
+          <rect x="16" y="256" width="218" height="88" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="30" y="284" font-size="18" font-weight="700" fill="var(--ink)">이미지 · 스토리지</text>
+          <text x="30" y="308" font-size="16" fill="var(--ink-2)">Cloud Storage 업로드</text>
+          <text x="30" y="330" font-size="16" fill="var(--ink-2)">시크릿 · Secret Manager</text>
+
+          <rect x="246" y="256" width="218" height="88" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="260" y="284" font-size="18" font-weight="700" fill="var(--ink)">지표 노출</text>
+          <text x="260" y="308" font-size="16" fill="var(--ink-2)">Prometheus 엔드포인트</text>
+          <text x="260" y="330" font-size="16" fill="var(--ink-2)">k6 부하 · 320 req/s 한계</text>
+
+          <line x1="240" y1="360" x2="240" y2="400" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahR)"/>
+          <text x="254" y="386" font-size="16" fill="var(--ink-2)">JDBC</text>
+
+          <rect x="0" y="404" width="480" height="72" rx="10" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="16" y="434" font-size="19" font-weight="700" fill="var(--ink)">Cloud SQL · MySQL 8.4</text>
+          <text x="16" y="460" font-size="16" fill="var(--ink-2)">이미지 Cloud Storage · DB · 파일 분리</text>
+
+          <rect x="0" y="504" width="480" height="150" rx="12" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="7 5"/>
+          <text x="16" y="534" font-size="21" font-weight="800" fill="var(--ink)">배포 · 운영</text>
+
+          <rect x="16" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="85" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">로컬 훅 게이트</text>
+          <text x="85" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">tsc · mvnw test</text>
+          <line x1="154" y1="580" x2="170" y2="580" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahR)"/>
+
+          <rect x="171" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="240" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">GitHub Actions</text>
+          <text x="240" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">main 머지 → 배포</text>
+          <line x1="309" y1="580" x2="325" y2="580" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahR)"/>
+
+          <rect x="326" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="395" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">Grafana</text>
+          <text x="395" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">임계 초과 알림</text>
+
+          <text x="16" y="638" font-size="16" fill="var(--ink-2)">AI 협업 하네스 · 훅 · 검토 에이전트 5종 · 12p</text>
+
+          <rect x="0" y="676" width="16" height="16" rx="3" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="24" y="689" font-size="16" font-weight="700" fill="var(--ink-2)">내 담당</text>
+        </svg>
+      </div>
+
+      <div class="hns2">
+        <div class="hnh"><b>혼자 팀 프로세스를 돌린 방법</b></div>
+
+        <div class="hgrp">
+          <div class="glab">규칙 문서 2종 <em>세션이 바뀌어도 맥락 유지</em></div>
+          <div class="grow"><b><code>CLAUDE.md</code></b> 매 작업에 적용되는 규칙</div>
+          <div class="grow"><b><code>ai-harness.md</code></b> 스택 · 브랜치 · PR 상세 규칙</div>
+        </div>
+
+        <div class="hgrp">
+          <div class="glab">라이프사이클 커맨드 2종 <em>1인인데도 팀 절차 그대로</em></div>
+          <div class="grow"><b>시작</b> 깃 이슈 · 트래커 티켓 · 브랜치를 한 번에 만들고 서로 링크</div>
+          <div class="grow"><b>종료</b> PR 생성 → CI 통과 대기 → squash 머지 → 티켓 완료 → 배포 스모크</div>
+        </div>
+
+        <div class="hgrp">
+          <div class="glab">토큰 비용 규칙 <em>컨텍스트를 예산으로 취급</em></div>
+          <div class="chips">
+            <span>넓은 탐색은 서브에이전트 위임</span><span>Grep으로 위치 찾고 해당 줄만 읽기</span><span>확인된 사실 재조회 금지</span><span>diff 위험도 티어링</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div><div class="mk">Role</div><div class="mv">1인 풀스택 — 웹 · 앱 · 서버 · 인프라 · 운영</div></div>
+      <div><div class="mk">Team</div><div class="mv">1인 · 외주 계약(저장소·기능 상세 비공개)</div></div>
+      <div><div class="mk">Period</div><div class="mv">2026.07.02 ~ 07.24 · 집중 개발 21일</div></div>
+      <div><div class="mk">Stack</div><div class="mv">Spring Boot · React · React Native · Cloud Run</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 08 · HairFolio 협업 하네스 ════════════ -->
+  <section class="s" data-label="HairFolio 하네스" data-screen-label="11 HairFolio 하네스">
+    <div class="top">
+      <span class="no">Project 03 &nbsp;HairFolio</span>
+      <span class="pg">12 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">AI 협업 하네스</span> 사람이 아니라 훅과 에이전트로 세운 리뷰어</h2>
+    <p class="lead">규칙을 지키는 주체를 사람 → 시스템으로.</p>
+
+    <div class="cards n4">
+      <div class="card">
+        <div class="kv">2<small>개 훅</small></div>
+        <h3>push 게이트 훅</h3>
+        <p><code>PreToolUse</code>가 <code>git push</code>를 잡아 게이트 체크리스트를 다시 주입, <code>Stop</code>이 턴 종료 시 타입체크를 실행해 실패면 <code>exit 2</code>로 차단. 컨텍스트 압축으로 규칙이 사라지는 지점을 훅이 메우는 구조.</p>
+      </div>
+      <div class="card">
+        <div class="kv">2<small>개 명령</small></div>
+        <h3>완료 기준(DoD) 명령화</h3>
+        <p>프론트·앱을 고치면 <code>npx tsc --noEmit</code>, 서버 변경이 push에 끼면 <code>./mvnw test</code>. 통과 기준이 없으면 게이트는 도장만 찍는 꼴.</p>
+      </div>
+      <div class="card">
+        <div class="kv">5<small>종 에이전트</small></div>
+        <h3>검토자와 작성자 분리</h3>
+        <p>diff 리뷰, 웹·앱 화면 동기화 검사, 시나리오 QA, 계약 추출, 배포 후 헬스 점검. <b>부여하는 도구에서 편집 도구를 빼</b> 구조적으로 수정 불가.</p>
+      </div>
+      <div class="card">
+        <div class="kv">32<small>건 기각</small></div>
+        <h3>채택·기각 기록 · PR 템플릿</h3>
+        <p>템플릿에 채택·기각 사유 칸을 만들어 작업마다 기록. 검토 에이전트가 잘못 짚은 것을 직접 확인하고 되돌린 건도 포함.</p>
+      </div>
+    </div>
+
+    <div class="kpi n3">
+      <div><div class="v">460</div><div class="k">21일 연속 커밋 · 일 평균 21.9건, 최고 51건</div></div>
+      <div><div class="v">281<span style="font-size:19px;">PR</span></div><div class="k">이슈 113건 · 로직·API 변경은 diff 리뷰 필수, 스타일은 생략</div></div>
+      <div><div class="v">303</div><div class="k">백엔드 테스트 케이스 · 61개 파일 · 게이트의 판단 근거</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 09 · HairFolio 조용한 결함 ════════════ -->
+  <section class="s" data-label="HairFolio 결함" data-screen-label="12 HairFolio 조용한 결함">
+    <div class="top">
+      <span class="no">Project 03 &nbsp;HairFolio</span>
+      <span class="pg">13 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">백엔드 트러블슈팅</span> 예외가 나지 않은 결함 세 건</h2>
+    <p class="lead">저장 실패 · 성능 저하 · 무인증 접근 — 로그엔 흔적 없음.</p>
+
+    <div class="dchain">
+      <div class="card warn dlead">
+        <h3>무인증 리소스 접근</h3>
+        <p>관리자 API를 빼면 요청자 신원 확인 체계가 없는 상태. 남의 자원을 조회·취소·변경, 타인 명의 생성까지 가능.</p>
+      </div>
+      <div class="dgo">→</div>
+      <div class="dfix">
+        <div class="dfl">인가 조치 · 네 단계로 확장</div>
+        <div class="dsteps4">
+          <div class="dst"><b>① 신원</b><span>토큰 발급·검증 체계 수립</span></div>
+          <div class="dst"><b>② 소유권</b><span>서비스 레이어에서 자원 소유자 확인</span></div>
+          <div class="dst"><b>③ 역할</b><span>상태 전이를 행위자 역할별로 분리</span></div>
+          <div class="dst last"><b>④ 만료</b><span>리프레시 토큰은 불투명 랜덤 값 · DB에는 SHA-256 해시만 · 회전 시 재사용 차단</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards n2 drest">
+      <div class="card">
+        <h3>스케줄러 트랜잭션 누락</h3>
+        <p><code>@Scheduled</code>가 같은 클래스의 <code>@Transactional</code>을 내부 호출해 프록시 우회. 엔티티가 detached라 발송 플래그 미저장.</p>
+      </div>
+      <div class="card">
+        <h3>N+1</h3>
+        <div class="nA">
+          <div class="nAr">
+            <span class="nn">1</span>
+            <div class="nAc"><b>채팅방 목록</b><span>방마다 마지막 메시지를 따로 조회</span></div>
+            <span class="nAg">→</span>
+            <div class="nAf"><code>MAX(id)</code> 서브쿼리로 한 번에 모아 메모리 매핑</div>
+          </div>
+          <div class="nAr">
+            <span class="nn">2</span>
+            <div class="nAc"><b>예약 목록</b><span><code>@ElementCollection</code>이라 EntityGraph로 안 잡히고 지연 로딩</span></div>
+            <span class="nAg">→</span>
+            <div class="nAf"><code>@BatchSize(100)</code>으로 <code>IN</code> 절 배치 로딩</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ 10 · LearnBridge 인트로 ════════════ -->
+  <section class="s intro" data-label="LearnBridge 인트로" data-screen-label="13 LearnBridge 인트로">
+    <div class="ihd">
+      <span class="ino">Project 04</span>
+      <h1>LearnBridge</h1>
+      <span class="idef">역할 기반 접근 제어(RBAC) 통합 학사 관리 플랫폼</span>
+    </div>
+
+    <div class="mid">
+      <div class="arch dgm">
+        <svg class="dg" viewBox="0 0 480 700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-3)"/></marker></defs>
+
+          <rect x="0" y="0" width="480" height="50" rx="10" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="16" y="32" font-size="19" font-weight="700" fill="var(--ink)">사용자</text>
+          <text x="92" y="32" font-size="17" fill="var(--ink-2)">ADMIN · TEACHER · STUDENT · PARENT</text>
+
+          <line x1="240" y1="50" x2="240" y2="86" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahA)"/>
+          <text x="254" y="74" font-size="16" fill="var(--ink-2)">로그인 · 카카오 OAuth · 이메일</text>
+
+          <rect x="0" y="90" width="480" height="270" rx="12" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="16" y="120" font-size="21" font-weight="800" fill="var(--ink)">React 19 · TypeScript · Vite</text>
+
+          <rect x="16" y="136" width="218" height="96" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="30" y="166" font-size="19" font-weight="700" fill="var(--ink)">RBAC 라우팅</text>
+          <text x="30" y="190" font-size="16" fill="var(--ink-2)">4권한 접근 분기</text>
+          <text x="30" y="212" font-size="16" fill="var(--ink-2)">담임 · 과목별 범위 제어</text>
+
+          <rect x="246" y="136" width="218" height="96" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="260" y="166" font-size="19" font-weight="700" fill="var(--ink)">Axios 인터셉터</text>
+          <text x="260" y="190" font-size="16" fill="var(--ink-2)">Silent Refresh · 401 재발급</text>
+          <text x="260" y="212" font-size="16" fill="var(--ink-2)">실패 요청 큐잉 · 재시도</text>
+
+          <rect x="16" y="246" width="218" height="96" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="30" y="276" font-size="19" font-weight="700" fill="var(--ink)">Zustand 인증 상태</text>
+          <text x="30" y="300" font-size="16" fill="var(--ink-2)">역할별 라우팅 · 레이아웃</text>
+          <text x="30" y="322" font-size="16" fill="var(--ink-2)">토큰 · 사용자 정보</text>
+
+          <rect x="246" y="246" width="218" height="96" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="260" y="276" font-size="19" font-weight="700" fill="var(--ink)">관리자 파이프라인</text>
+          <text x="260" y="300" font-size="16" fill="var(--ink-2)">계정 생성 · 반 배정</text>
+          <text x="260" y="322" font-size="16" fill="var(--ink-2)">과목 매핑</text>
+
+          <line x1="240" y1="360" x2="240" y2="400" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahA)"/>
+          <text x="254" y="386" font-size="16" fill="var(--ink-2)">REST /api/v1 · JWT</text>
+
+          <rect x="0" y="404" width="480" height="72" rx="10" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="16" y="434" font-size="19" font-weight="700" fill="var(--ink)">백엔드 API</text>
+          <text x="16" y="460" font-size="16" fill="var(--ink-2)">JWT 발급 · 학사 도메인 API · 계약 · 권한 기준 협의</text>
+
+          <rect x="0" y="504" width="480" height="150" rx="12" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="7 5"/>
+          <text x="16" y="534" font-size="21" font-weight="800" fill="var(--ink)">배포 · 검증</text>
+
+          <rect x="16" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="85" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">GitHub Actions</text>
+          <text x="85" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">main push · 빌드</text>
+          <line x1="154" y1="580" x2="170" y2="580" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahA)"/>
+
+          <rect x="171" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="240" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">Vercel</text>
+          <text x="240" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">자동 배포</text>
+          <line x1="309" y1="580" x2="325" y2="580" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ahA)"/>
+
+          <rect x="326" y="550" width="138" height="60" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
+          <text x="395" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)">Playwright E2E</text>
+          <text x="395" y="596" text-anchor="middle" font-size="16" fill="var(--ink-2)">배포 URL · 3종</text>
+
+          <text x="16" y="638" font-size="16" fill="var(--ink-2)">SonarQube Cloud · 정적 분석 · 선제 리팩토링</text>
+
+          <rect x="0" y="676" width="16" height="16" rx="3" fill="rgba(47,75,216,0.06)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="24" y="689" font-size="16" font-weight="700" fill="var(--ink-2)">내 담당</text>
+        </svg>
+      </div>
+
+      <div class="shots">
+        <div class="shot">
+          <img src="./assets/lb_login.jpg" alt="로그인 화면">
+          <div class="cap"><b>로그인</b> · 카카오 OAuth · 이메일</div>
+        </div>
+        <div class="shot">
+          <img src="./assets/lb_admin_assign.jpg" alt="관리자 반 배정 화면">
+          <div class="cap"><b>관리자 · 반 배정</b> · 담임·학생 할당</div>
+        </div>
+        <div class="shot">
+          <img src="./assets/lb_teacher_counseling.jpg" alt="교사 화면">
+          <div class="cap"><b>교사 화면</b> · 담임 반 학생 목록 · 상담 내역</div>
+        </div>
+        <div class="shot">
+          <img src="./assets/lb_student_info.jpg" alt="학생 화면">
+          <div class="cap"><b>학생 화면</b> · 본인 정보만 조회 · 권한별 범위 차등</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div><div class="mk">Role</div><div class="mv">프론트엔드 — 인증·인가 · 관리자 · E2E · 배포</div></div>
+      <div><div class="mk">Team</div><div class="mv">4인 · FE 2 · BE 2</div></div>
+      <div><div class="mk">Period</div><div class="mv">2025.03.03 ~ 2025.06.13</div></div>
+      <div><div class="mk">Stack</div><div class="mv">React 19 · TypeScript · Zustand · Playwright · SonarQube</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ 11 · LearnBridge 본문 ════════════ -->
+  <section class="s" data-label="LearnBridge 본문" data-screen-label="14 LearnBridge 본문">
+    <div class="top">
+      <span class="no">Project 04 &nbsp;LearnBridge</span>
+      <span class="pg">15 / 15</span>
+    </div>
+    <h2 class="claim"><span class="tp pill">인증</span> 화면에 드러나지 않는 토큰 만료</h2>
+    <p class="lead">만료돼도 끊긴 요청을 버리지 않고 재전송.</p>
+
+    <div class="flow">
+      <span class="fl">Silent Refresh<br><span style="color:var(--ink-3);font-weight:600;">Axios 인터셉터</span></span>
+      <div class="st"><b>① 401 가로채기</b><span>화면 코드가 아니라 인터셉터가 수신. 실패한 요청은 버리지 않고 큐에 보관.</span></div>
+      <div class="ar">→</div>
+      <div class="st"><b>② 백그라운드 재발급</b><span>동시에 여러 요청이 401을 받아도 재발급은 한 번만 실행.</span></div>
+      <div class="ar">→</div>
+      <div class="st last"><b>③ 큐 일괄 재전송</b><span>새 토큰으로 모아둔 요청을 일괄 재전송. <b>화면에는 아무 변화 없음.</b></span></div>
+    </div>
+
+  </section>
+
+</x-import>
+</x-dc>
+<script>
+// deck-stage 뷰어 툴바(◀ 3/10 ▶ Reset) 숨김.
+// 슬라이드 내용이 아니라 미리보기 컨트롤이고, shadow DOM 안이라 문서 CSS가 닿지 않는다.
+// 이동은 좌우 화살표 키와 왼쪽 썸네일 레일로 그대로 된다. PDF 출력에는 원래 안 실린다.
+(function () {
+  var tries = 0;
+  var timer = setInterval(function () {
+    var d = document.querySelector('deck-stage');
+    if (d && d.shadowRoot) {
+      var st = document.createElement('style');
+      st.textContent = '.overlay{display:none !important}';
+      d.shadowRoot.appendChild(st);
+      clearInterval(timer);
+    } else if (++tries > 60) {
+      clearInterval(timer);
+    }
+  }, 50);
+})();
+</script>
+</body>
+</html>
