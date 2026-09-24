@@ -567,17 +567,17 @@
       <div class="card">
         <div class="kv">1,350 → 454<small>ms</small></div>
         <h3>③ Redis 캐싱 · 대상 분리</h3>
-        <p>Redis 캐싱 — spots 결과(TTL 30분)는 쿼리를, route(TTL 1시간)는 DB를 안 쓰는 <b>TSP 연산 자체를 생략.</b> route p95 기준.</p>
+        <p>Redis 캐싱: spots 결과(TTL 30분)는 쿼리를, route(TTL 1시간)는 DB를 안 쓰는 <b>TSP 연산 자체를 생략.</b> route p95 기준.</p>
       </div>
       <div class="card">
         <div class="kv">2 → 4</div>
         <h3>④ HPA 스케일아웃</h3>
-        <p>HPA(CPU 70% 초과 시 pod 2 → 4). 캐시가 식어 CPU가 뛰는 구간의 보완책 — I/O 병목엔 무효, CPU 병목엔 유효.</p>
+        <p>HPA(CPU 70% 초과 시 pod 2 → 4). 캐시가 식어 CPU가 뛰는 구간의 보완책. I/O 병목엔 무효, CPU 병목엔 유효.</p>
       </div>
       <div class="card warn">
         <div class="kv">400</div>
         <h3>⑤ k6 인코딩 버그 분리</h3>
-        <p>k6가 한글 파라미터를 인코딩하지 않고 보내 받은 응답. <code>encodeURIComponent</code> 한 줄로 <b>0%</b> — 테스트가 만든 에러를 걷어내야 진짜 서버 에러가 보임.</p>
+        <p>k6가 한글 파라미터를 인코딩하지 않고 보내 받은 응답. <code>encodeURIComponent</code> 한 줄로 <b>0%</b>. 테스트가 만든 에러를 걷어내야 진짜 서버 에러가 보임.</p>
       </div>
     </div>
 
@@ -881,7 +881,7 @@
       <span class="pg">09 / 15</span>
     </div>
     <h2 class="claim"><span class="tp pill">배포 · 운영</span> <em>안정성</em>은 주의력이 아니라 구조로</h2>
-    <p class="lead">제어 주기 미달 · 재부팅 미기동 · 결과 오귀속 — 그때그때가 아니라 구조로.</p>
+    <p class="lead">제어 주기 미달 · 재부팅 미기동 · 결과 오귀속 → 그때그때가 아니라 구조로.</p>
 
     <div class="two">
       <div class="col">
@@ -912,7 +912,7 @@
           <div class="ar">↓</div>
           <div class="st"><b>② 이미지 교체</b><span>통과분만 배포 대상. 배포 관련 변경에만 트리거가 걸리도록 범위 한정.</span></div>
           <div class="ar">↓</div>
-          <div class="st last"><b>③ 헬스체크 · 롤백</b><span>기동 후 헬스체크 실패면 <b>직전 이미지로 롤백.</b> 롤백은 <code>trap</code>이 아니라 명시 호출 — "적혀만 있고 한 번도 안 도는 것"을 막기 위해.</span></div>
+          <div class="st last"><b>③ 헬스체크 · 롤백</b><span>기동 후 헬스체크 실패면 <b>직전 이미지로 롤백.</b> 롤백은 <code>trap</code>이 아니라 명시 호출. "적혀만 있고 한 번도 안 도는 것"을 막기 위해.</span></div>
         </div>
       </div>
     </div>
@@ -925,7 +925,7 @@
       <span class="pg">10 / 15</span>
     </div>
     <h2 class="claim"><span class="tp pill">AI · 비전</span> 요구가 다르면 <em>모델도 다르게</em></h2>
-    <p class="lead">스테이션은 <b>크기·전복 판정</b>, 온보드는 <b>포크 위치</b> — 답이 달라 모델도 분리.</p>
+    <p class="lead">스테이션은 <b>크기·전복 판정</b>, 온보드는 <b>포크 위치</b>. 답이 달라 모델도 분리.</p>
 
     <div class="cards n2">
       <div class="card">
@@ -942,11 +942,11 @@
 
     <div class="bh2"><b>학습 사이클</b><span>데이터 보강 → 실물 평가 → 승격</span></div>
     <div class="flow">
-      <div class="st"><b>① 공개 데이터 + 자체 촬영 572장</b><span>학습셋 <b>20,565장</b>의 뼈대는 공개 데이터(LOCO·SCD). 목재 파렛트뿐이라 <b>검은 플라스틱은 임계 0.02에서도 검출 0건</b> — 리그에서 직접 촬영·라벨링한 <b>572장</b>(리그 289 + 가림 283)으로 도메인 파인튜닝.</span></div>
+      <div class="st"><b>① 공개 데이터 + 자체 촬영 572장</b><span>학습셋 <b>20,565장</b>의 뼈대는 공개 데이터(LOCO·SCD). 목재 파렛트뿐이라 <b>검은 플라스틱은 임계 0.02에서도 검출 0건</b>. 리그에서 직접 촬영·라벨링한 <b>572장</b>(리그 289 + 가림 283)으로 도메인 파인튜닝.</span></div>
       <div class="ar">→</div>
       <div class="st"><b>② 실물 리그 평가셋</b><span>KPI 판정 무대를 공개 데이터셋에서 <b>실물 리그 평가셋으로 이전.</b> 배포 환경과 평가 환경을 맞추기 위해.</span></div>
       <div class="ar">→</div>
-      <div class="st last"><b>③ 승격 게이트 3조건</b><span>교체 조건은 착수 전에 고정 — 목표 지표·회귀 없음·망각 없음. 공개 데이터로 동률이던 두 실험이 <b>실물 리그 12프레임에서 11/12 대 12/12로 판가름.</b></span></div>
+      <div class="st last"><b>③ 승격 게이트 3조건</b><span>교체 조건은 착수 전에 고정: 목표 지표·회귀 없음·망각 없음. 공개 데이터로 동률이던 두 실험이 <b>실물 리그 12프레임에서 11/12 대 12/12로 판가름.</b></span></div>
     </div>
 
     <div class="kpi">
@@ -1060,7 +1060,7 @@
     </div>
 
     <div class="meta">
-      <div><div class="mk">Role</div><div class="mv">1인 풀스택 — 웹 · 앱 · 서버 · 인프라 · 운영</div></div>
+      <div><div class="mk">Role</div><div class="mv">1인 풀스택 (웹 · 앱 · 서버 · 인프라 · 운영)</div></div>
       <div><div class="mk">Team</div><div class="mv">1인 · 외주 계약(저장소·기능 상세 비공개)</div></div>
       <div><div class="mk">Period</div><div class="mv">2026.07.02 ~ 07.24 · 집중 개발 21일</div></div>
       <div><div class="mk">Stack</div><div class="mv">Spring Boot · React · React Native · Cloud Run</div></div>
@@ -1113,7 +1113,7 @@
       <span class="pg">13 / 15</span>
     </div>
     <h2 class="claim"><span class="tp pill">백엔드 트러블슈팅</span> 예외가 나지 않은 결함 세 건</h2>
-    <p class="lead">저장 실패 · 성능 저하 · 무인증 접근 — 로그엔 흔적 없음.</p>
+    <p class="lead">저장 실패 · 성능 저하 · 무인증 접근: 로그엔 흔적 없음.</p>
 
     <div class="dchain">
       <div class="card warn dlead">
@@ -1181,18 +1181,18 @@
           <text x="16" y="120" font-size="21" font-weight="800" fill="var(--ink)">React 19 · TypeScript · Vite</text>
 
           <rect x="16" y="136" width="218" height="96" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
-          <text x="30" y="166" font-size="19" font-weight="700" fill="var(--ink)">RBAC 라우팅</text>
-          <text x="30" y="190" font-size="16" fill="var(--ink-2)">4권한 접근 분기</text>
+          <text x="30" y="166" font-size="19" font-weight="700" fill="var(--ink)">4권한 레이아웃 분기</text>
+          <text x="30" y="190" font-size="16" fill="var(--ink-2)">역할별 화면 · 메뉴 분리</text>
           <text x="30" y="212" font-size="16" fill="var(--ink-2)">담임 · 과목별 범위 제어</text>
 
           <rect x="246" y="136" width="218" height="96" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
           <text x="260" y="166" font-size="19" font-weight="700" fill="var(--ink)">Axios 인터셉터</text>
           <text x="260" y="190" font-size="16" fill="var(--ink-2)">Silent Refresh · 401 재발급</text>
-          <text x="260" y="212" font-size="16" fill="var(--ink-2)">실패 요청 큐잉 · 재시도</text>
+          <text x="260" y="212" font-size="16" fill="var(--ink-2)">만료 사유만 선별 · 1회 재시도</text>
 
           <rect x="16" y="246" width="218" height="96" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
           <text x="30" y="276" font-size="19" font-weight="700" fill="var(--ink)">Zustand 인증 상태</text>
-          <text x="30" y="300" font-size="16" fill="var(--ink-2)">역할별 라우팅 · 레이아웃</text>
+          <text x="30" y="300" font-size="16" fill="var(--ink-2)">역할 · 담임 여부 보관</text>
           <text x="30" y="322" font-size="16" fill="var(--ink-2)">토큰 · 사용자 정보</text>
 
           <rect x="246" y="246" width="218" height="96" rx="8" fill="var(--surface)" stroke="rgba(23,26,33,0.2)"/>
@@ -1252,7 +1252,7 @@
     </div>
 
     <div class="meta">
-      <div><div class="mk">Role</div><div class="mv">프론트엔드 — 인증·인가 · 관리자 · E2E · 배포</div></div>
+      <div><div class="mk">Role</div><div class="mv">프론트엔드 (인증·인가 · 관리자 · E2E · 배포)</div></div>
       <div><div class="mk">Team</div><div class="mv">4인 · FE 2 · BE 2</div></div>
       <div><div class="mk">Period</div><div class="mv">2025.03.03 ~ 2025.06.13</div></div>
       <div><div class="mk">Stack</div><div class="mv">React 19 · TypeScript · Zustand · Playwright · SonarQube</div></div>
@@ -1270,11 +1270,11 @@
 
     <div class="flow">
       <span class="fl">Silent Refresh<br><span style="color:var(--ink-3);font-weight:600;">Axios 인터셉터</span></span>
-      <div class="st"><b>① 401 가로채기</b><span>화면 코드가 아니라 인터셉터가 수신. 실패한 요청은 버리지 않고 큐에 보관.</span></div>
+      <div class="st"><b>① 401 선별 수신</b><span>화면 코드가 아니라 인터셉터가 수신. 401 중 <b>만료 사유만</b> 골라 재발급 대상으로 판정.</span></div>
       <div class="ar">→</div>
-      <div class="st"><b>② 백그라운드 재발급</b><span>동시에 여러 요청이 401을 받아도 재발급은 한 번만 실행.</span></div>
+      <div class="st"><b>② 백그라운드 재발급</b><span>재발급 요청에는 만료 토큰을 붙이지 않아 순환 차단. <code>_retry</code> 플래그로 무한 루프 방지.</span></div>
       <div class="ar">→</div>
-      <div class="st last"><b>③ 큐 일괄 재전송</b><span>새 토큰으로 모아둔 요청을 일괄 재전송. <b>화면에는 아무 변화 없음.</b></span></div>
+      <div class="st last"><b>③ 원 요청 재전송</b><span>새 토큰으로 끊긴 요청을 다시 보냄. <b>화면에는 아무 변화 없음.</b></span></div>
     </div>
 
   </section>
